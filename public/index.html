@@ -59,7 +59,8 @@ const opts=(k,multi)=>Q[k].map(o=>{const on=multi?(ans[k]||[]).includes(o[0]):an
 function tog(k,v){const a=ans[k]||[];set(k,a.includes(v)?a.filter(x=>x!==v):[...a,v])}
 const yn=i=>`<div class="tg"><span>${t(H[i][0],H[i][1])}</span><div><button aria-pressed="${ans['h'+(i+1)]===true}" onclick="set('h${i+1}',true)">${t('Yes','Ya')}</button><button aria-pressed="${ans['h'+(i+1)]===false}" onclick="set('h${i+1}',false)">${t('No','Tidak')}</button></div></div>`;
 const val=()=>{const a=ans;return[ ()=>a.lang,()=>a.name&&/^\+?60\d{8,10}$/.test((a.phone||'').replace(/[\s-]/g,''))&&/\S+@\S+\.\S+/.test(a.email||''),()=>a.area,()=>a.age&&a.gender&&a.gpref,()=>a.support&&a.need,()=>a.budget,()=>a.hours&&(a.langs||[]).length,()=>[1,2,3,4,5].every(i=>typeof a['h'+i]==='boolean'),()=>a.consent][step-1]()};
-const bind=(k,ph,type='text')=>`<input type="${type}" value="${E(ans[k]||'')}" placeholder="${ph}" oninput="ans.${k}=this.value;persist()" onblur="render()">`;
+function upd(){const b=$('#nx');if(b){const ok=!!val();b.disabled=!ok;b.style.opacity=ok?1:.5}}
+const bind=(k,ph,type='text')=>`<input type="${type}" value="${E(ans[k]||'')}" placeholder="${ph}" oninput="ans.${k}=this.value;persist();upd()">`;
 function screen(){switch(step){
  case 1:return `<div class="row"><button class="opt" aria-pressed="${L==='bm'}" onclick="L='bm';ans.lang='bm';set('lang','bm')">Bahasa Melayu</button><button class="opt" aria-pressed="${L==='en'}" onclick="L='en';ans.lang='en';set('lang','en')">English</button></div>
   <button class="opt" aria-pressed="${!ans.helper}" onclick="set('helper',false)">${t('I am filling this for myself (Parent)','Saya mengisi untuk diri sendiri (Ibu bapa)')}</button>
@@ -80,7 +81,7 @@ function screen(){switch(step){
   <button class="opt" aria-pressed="${!!ans.consent}" onclick="set('consent',!ans.consent)">${ans.consent?'☑':'☐'} ${t('I agree to be matched into a group and share my first name and WhatsApp number with matched families only.','Saya bersetuju dipadankan dalam kumpulan dan berkongsi nama pertama & nombor WhatsApp dengan keluarga yang dipadankan sahaja.')}</button></div>`}}}
 function wizard(){const tt=TITLES[step-1];return `<div class="top"><p class="m">${t('Step','Langkah')} ${step} ${t('of','daripada')} 9</p><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><div class="bar" role="progressbar" aria-valuenow="${step}" aria-valuemax="9"><i style="width:${step/9*100}%"></i></div>
  <h2>${t(tt[0],tt[1])}</h2>${screen()}<p class="err">${E(err)}</p>
- <div class="row" style="margin-top:18px">${step>1?`<button class="btn s" onclick="step--;err='';render()">${t('Back','Kembali')}</button>`:''}<button class="btn" style="flex:1" ${val()?'':'disabled style="opacity:.5"'} onclick="next()">${step===9?t('Complete & Find My Match','Selesai & Cari Padanan Saya'):t('Next','Seterusnya')}</button></div>`}
+ <div class="row" style="margin-top:18px">${step>1?`<button class="btn s" onclick="step--;err='';render()">${t('Back','Kembali')}</button>`:''}<button id="nx" class="btn" style="flex:1;opacity:${val()?1:.5}" ${val()?'':'disabled'} onclick="next()">${step===9?t('Complete & Find My Match','Selesai & Cari Padanan Saya'):t('Next','Seterusnya')}</button></div>`}
 async function next(){err='';if(step<9){step++;persist();return render()}try{await api('save',{answers:ans,step});U=await api('complete',{});localStorage.removeItem('ans');render()}catch(e){err=e.message;render()}}
 const wa=(who,msg)=>`<div class="wa"><b>${who}</b><div class="m">${E(msg)}</div></div>`;
 function dash(){const s=U.status,g=U.group,e=U.estimate;let body='';
@@ -140,7 +141,7 @@ function drawSim(){if(!sim){$('#sim').innerHTML='';return}
  $('#sim').innerHTML=`<div class="ov" role="dialog" aria-label="WhatsApp preview"><div class="card"><div class="row">${Object.entries(SIM).map(([k,v])=>`<button class="opt" style="flex:1 1 30%;margin:4px 0" aria-pressed="${sim.f===k}" onclick="sim={f:'${k}',n:1};drawSim()">${v.n}</button>`).join('')}</div>
  <div class="ph"><header><b>Group 3 · Pondoku</b><small>Pondoku Helper, Aisyah, Mei Ling, Kumar</small></header>${pin?`<div class="pin">📌 ${E(pin.t)}</div>`:''}<div class="chat" id="ch">${it.map(bub).join('')}</div></div>
  <p>${E(cap)}</p><p class="m">${t('Preview only. Nothing is sent.','Pratonton sahaja. Tiada apa dihantar.')}</p>
- <div class="row"><button class="btn" style="flex:1" ${sim.n>=S.length?'disabled style="opacity:.5"':''} onclick="sim.n++;drawSim()">${t('Next','Seterusnya')}</button><button class="btn s" onclick="sim.n=1;drawSim()">${t('Restart','Mula semula')}</button><button class="btn s" onclick="sim=null;drawSim()">${t('Close','Tutup')}</button></div></div></div>`;
+ <div class="row"><button class="btn" style="flex:1;opacity:${sim.n>=S.length?.5:1}" ${sim.n>=S.length?'disabled':''} onclick="sim.n++;drawSim()">${t('Next','Seterusnya')}</button><button class="btn s" onclick="sim.n=1;drawSim()">${t('Restart','Mula semula')}</button><button class="btn s" onclick="sim=null;drawSim()">${t('Close','Tutup')}</button></div></div></div>`;
  const c=$('#ch');if(c)c.scrollTop=c.scrollHeight}
 function render(){$('#app').innerHTML=!T||!U?auth():U.role==='admin'?admin():dash();
  document.documentElement.lang=L==='bm'?'ms':'en';$('#help').textContent=t('Need help?','Perlukan bantuan?');$('#simb').textContent=t('WhatsApp preview','Pratonton WhatsApp');$('#help').href=WA+encodeURIComponent('Hi Pondoku, I need help');

@@ -38,7 +38,7 @@ const mail=async(u,subject,text)=>{db.outbox.push({to:u.email,subject,text,at:Da
  try{const t=process.env.SMTP_URL?nodemailer.createTransport(process.env.SMTP_URL):nodemailer.createTransport({jsonTransport:true});
   await t.sendMail({from:'Pondoku <hello@pondoku.my>',to:u.email,subject,text});}catch(e){console.log('mail',e.message)}};
 const welcome=g=>{const ms=g.members.map(byId),c=cost(A(ms[0]));
- return `Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: ${clusterScore(ms)}%. General estimate for a shared home: RM${c[0]} to RM${c[1]} per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time.`};
+ return `Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: ${clusterScore(ms)}%. General estimate for a shared home: RM${c[0].toLocaleString('en-US')} to RM${c[1].toLocaleString('en-US')} per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time.`};
 
 function makeGroup(ms){const g={id:id('g'),name:'Group '+(db.groups.length+1),members:ms.map(m=>m.id),invites:{},joined:[],welcomed:false,hold:null,created:Date.now()};
  ms.forEach(m=>{m.status='Pending Consent';m.groupId=g.id;m.inviteAt=Date.now();g.invites[m.id]={url:null,sent:false,reminded:false}});
@@ -153,5 +153,4 @@ async function tick(){const now=Date.now(),H=36e5;
  save()}
 setInterval(()=>tick().catch(console.error),6e4);
 wa.init({db,byId,join,resolvePoll,welcome,mail,save});if(db.mode==='prod')wa.start();
-const PORT = process.env.PORT || 3001;
-app.listen(PORT,()=>console.log(`Pondoku on http://localhost:${PORT}  (admin: admin@pondoku.my / admin123)`));
+app.listen(process.env.PORT||3001,()=>console.log('Pondoku on http://localhost:3001  (admin: admin@pondoku.my / admin123)'));

@@ -92,14 +92,14 @@ function dash(){const s=U.status,g=U.group,e=U.estimate;let body='';
  else body=`<h2>${t('You are in a group','Anda dalam kumpulan')}</h2><p>${g.size} ${t('families','keluarga')} · ${g.score}%</p>${U.invite?`<a href="${E(U.invite)}" target="_blank" rel="noopener">WhatsApp</a>`:''}${g.welcome?wa('Pondoku Helper 📌',g.welcome):''}`;
  return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="out()">${t('Log out','Log keluar')}</button></div><p class="m">${E(U.code||'')}</p>${body}${g?`<p><button class="btn s" onclick="leave()">${t('Leave group / Reset status','Keluar kumpulan / Set semula status')}</button></p>`:''}`}
 async function leave(){if(confirm(t('Leave this group?','Keluar dari kumpulan ini?'))){U=await api('leave',{});render()}}
-const out=()=>{['tok','ans','step','uid'].forEach(k=>localStorage.removeItem(k));ans={};step=1;T=null;U=null;render()};
+const out=()=>{['tok','ans','step','uid'].forEach(k=>localStorage.removeItem(k));ans={};step=1;T=null;U=null;AD=null;render()};
 function auth(){return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><p>${t('Shared-care family matching for parents in Malaysia. Calm, private, no typing marathons.','Padanan keluarga penjagaan bersama untuk ibu bapa di Malaysia. Tenang, peribadi, tanpa menaip panjang.')}</p>
  <label>Email</label><input id="em" type="email" autocomplete="email"><label>${t('Password','Kata laluan')}</label><input id="pw" type="password" autocomplete="current-password"><p class="err">${E(err)}</p>
  <div class="row"><button class="btn" style="flex:1" onclick="login('login')">${t('Log in','Log masuk')}</button><button class="btn s" onclick="login('register')">${t('Sign up','Daftar')}</button></div>`}
 async function login(p){try{const r=await api(p,{email:$('#em').value,password:$('#pw').value});T=localStorage.tok=r.token;if(localStorage.uid!==r.user.id){localStorage.removeItem('ans');localStorage.removeItem('step');ans={};step=1;localStorage.uid=r.user.id}err='';await boot()}catch(e){err=e.message;render()}}
 // ---- Admin / coordinator ----
 let AD=null;
-async function adminLoad(){AD=await api('admin/state');AD.mon=await api('admin/monitor');render()}
+async function adminLoad(){const s=await api('admin/state');s.mon=await api('admin/monitor');AD=s;render()}
 const act=async(p,b)=>{try{await api('admin/'+p,b)}catch(e){alert(e.message)}adminLoad()};
 const HINT=['Shows who has been waiting longest.','Admin can reach out early and explain next steps.','A match may have been missed because the parent found the link confusing.','Stops a new family waiting without an answer.','Catches groups that need more members.'];
 const RULES=[['wait','Family Available for more than','days'],['dist','No group or compatible family within','km'],['invite','Invite not accepted within','days'],['consent','Consent request unanswered after','hours']];

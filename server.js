@@ -1,7 +1,10 @@
 // Pondoku — Express + JSON storage. Run: npm i && npm start  (http://localhost:3001)
 const express=require('express'),fs=require('fs'),crypto=require('crypto'),nodemailer=require('nodemailer');
 const wa=require('./wa');
-const app=express();app.use(express.json());app.use(express.static(__dirname+'/public'));
+const app=express();
+// Express 4 does not catch async errors: without this, one bad request (e.g. a stale poll id) kills the whole server.
+for(const m of['get','post']){const o=app[m].bind(app);app[m]=(p,...hs)=>o(p,...hs.map(h=>(q,r,n)=>{const bad=e=>{console.error(e);if(!r.headersSent)r.status(500).json({e:'Server error. Please try again.'})};try{const x=h(q,r,n);if(x&&x.catch)x.catch(bad)}catch(e){bad(e)}}))}
+process.on('unhandledRejection',e=>console.error('unhandled',e));app.use(express.json());app.use(express.static(__dirname+'/public'));
 const F=__dirname+'/data.json';
 const db=fs.existsSync(F)?JSON.parse(fs.readFileSync(F)):{users:[],groups:[],polls:[],outbox:[],sessions:{},mode:'demo',n:0};
 db.th=db.th||{wait:14,dist:15,invite:7,consent:48};
@@ -101,7 +104,7 @@ app.post('/api/admin/mode',auth,adm,(q,r)=>{db.mode=q.body.mode;if(db.mode==='pr
 app.post('/api/admin/invite',auth,adm,async(q,r)=>{const g=db.groups.find(x=>x.id===q.body.groupId);
  for(const uid of g.members)if(!g.invites[uid].sent){g.invites[uid]={url:q.body.url,sent:true,at:Date.now()};byId(uid).inviteAt=Date.now();await mail(byId(uid),'Pondoku: your private group link',`Join voluntarily here: ${q.body.url}`)}save();r.json({ok:1})});
 app.post('/api/admin/joined',auth,adm,(q,r)=>{join(db.groups.find(x=>x.id===q.body.groupId),q.body.userId);save();r.json({ok:1})});
-app.post('/api/admin/vote',auth,adm,async(q,r)=>{const p=db.polls.find(x=>x.id===q.body.pollId);p.votes[q.body.memberId]=!!q.body.yes;await resolvePoll(p);save();r.json({ok:1})});
+app.post('/api/admin/vote',auth,adm,async(q,r)=>{const p=db.polls.find(x=>x.id===q.body.pollId);if(!p)return r.status(404).json({e:'That request is no longer open'});p.votes[q.body.memberId]=!!q.body.yes;await resolvePoll(p);save();r.json({ok:1})});
 
 // ---- Family leave / reset ----
 app.post('/api/leave',auth,(q,r)=>{const u=q.u,g=db.groups.find(x=>x.id===u.groupId);

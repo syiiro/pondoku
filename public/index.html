@@ -100,7 +100,7 @@ async function login(p){try{const r=await api(p,{email:$('#em').value,password:$
 // ---- Admin / coordinator ----
 let AD=null;
 async function adminLoad(){AD=await api('admin/state');AD.mon=await api('admin/monitor');render()}
-const act=async(p,b)=>{await api('admin/'+p,b);adminLoad()};
+const act=async(p,b)=>{try{await api('admin/'+p,b)}catch(e){alert(e.message)}adminLoad()};
 const HINT=['Shows who has been waiting longest.','Admin can reach out early and explain next steps.','A match may have been missed because the parent found the link confusing.','Stops a new family waiting without an answer.','Catches groups that need more members.'];
 const RULES=[['wait','Family Available for more than','days'],['dist','No group or compatible family within','km'],['invite','Invite not accepted within','days'],['consent','Consent request unanswered after','hours']];
 function monitor(){const m=AD.mon,k=m.kpi,tile=(n,l)=>`<div class="card" style="flex:1 1 28%;text-align:center;margin:6px 0"><div style="font-size:30px;font-weight:700">${n}</div>${l}</div>`;

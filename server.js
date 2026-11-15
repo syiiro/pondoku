@@ -37,9 +37,11 @@ const clusterScore=ms=>{let t=0,n=0;for(let i=0;i<ms.length;i++)for(let j=i+1;j<
 const COST=[[640,900],[936,1320],[1100,1500],[1300,1800]];
 const cost=a=>COST[Math.max(0,BU.indexOf(a.budget))];
 const byId=i=>db.users.find(u=>u.id===i);
-const mail=async(u,subject,text)=>{db.outbox.push({to:u.email,subject,text,at:Date.now()});
- try{const t=process.env.SMTP_URL?nodemailer.createTransport(process.env.SMTP_URL):nodemailer.createTransport({jsonTransport:true});
-  await t.sendMail({from:'Pondoku <hello@pondoku.my>',to:u.email,subject,text});}catch(e){console.log('mail',e.message)}};
+const smtpUser=()=>{try{return decodeURIComponent(new URL(process.env.SMTP_URL).username)}catch{return ''}};
+const mail=async(u,subject,text)=>{const e={to:u.email,subject,text,at:Date.now()};db.outbox.push(e);
+ if(!process.env.SMTP_URL){e.status='NOT SENT: SMTP_URL is not set on this server';return}
+ try{await nodemailer.createTransport(process.env.SMTP_URL,{connectionTimeout:10000,socketTimeout:15000}).sendMail({from:`Pondoku <${smtpUser()}>`,to:u.email,subject,text});e.status='sent'}
+ catch(x){e.status='FAILED: '+x.message;console.log('mail failed:',x.message)}};
 const welcome=g=>{const ms=g.members.map(byId),c=cost(A(ms[0]));
  return `Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: ${clusterScore(ms)}%. General estimate for a shared home: RM${c[0].toLocaleString('en-US')} to RM${c[1].toLocaleString('en-US')} per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time.`};
 
@@ -100,6 +102,9 @@ app.get('/api/admin/state',auth,adm,(q,r)=>r.json({mode:db.mode,wa:wa.status(),
  groups:db.groups.map(g=>({...g,names:g.members.map(i=>byId(i).answers.name),score:clusterScore(g.members.map(byId)),welcome:welcome(g),estimate:cost(A(byId(g.members[0])))})),
  polls:db.polls.filter(p=>!p.done).map(p=>({...p,tally:{yes:Object.values(p.votes).filter(Boolean).length,no:Object.values(p.votes).filter(v=>!v).length,total:db.groups.find(g=>g.id===p.groupId).members.length}})),
  outbox:db.outbox.slice(-15).reverse()}));
+app.post('/api/admin/mailtest',auth,adm,async(q,r)=>{let host='';try{host=new URL(process.env.SMTP_URL).host}catch{host='(missing or invalid SMTP_URL)'}
+ await mail({email:q.body.to},'Pondoku test email','If you can read this, email is working.');save();
+ r.json({smtpSet:!!process.env.SMTP_URL,user:smtpUser(),host,result:db.outbox[db.outbox.length-1].status})});
 app.post('/api/admin/mode',auth,adm,(q,r)=>{db.mode=q.body.mode;if(db.mode==='prod')wa.start();save();r.json({mode:db.mode})});
 app.post('/api/admin/invite',auth,adm,async(q,r)=>{const g=db.groups.find(x=>x.id===q.body.groupId);
  for(const uid of g.members)if(!g.invites[uid].sent){g.invites[uid]={url:q.body.url,sent:true,at:Date.now()};byId(uid).inviteAt=Date.now();await mail(byId(uid),'Pondoku: your private group link',`Join voluntarily here: ${q.body.url}`)}save();r.json({ok:1})});

@@ -100,6 +100,7 @@ async function login(p){try{const r=await api(p,{email:$('#em').value,password:$
 // ---- Admin / coordinator ----
 let AD=null;
 async function adminLoad(){const s=await api('admin/state');s.mon=await api('admin/monitor');AD=s;render()}
+async function mailtest(){try{const r=await api('admin/mailtest',{to:$('#mt').value});alert((r.smtpSet?'SMTP: '+r.user+' via '+r.host:'SMTP_URL is NOT set on this server')+'\n'+r.result)}catch(e){alert(e.message)}adminLoad()}
 const act=async(p,b)=>{try{await api('admin/'+p,b)}catch(e){alert(e.message)}adminLoad()};
 const HINT=['Shows who has been waiting longest.','Admin can reach out early and explain next steps.','A match may have been missed because the parent found the link confusing.','Stops a new family waiting without an answer.','Catches groups that need more members.'];
 const RULES=[['wait','Family Available for more than','days'],['dist','No group or compatible family within','km'],['invite','Invite not accepted within','days'],['consent','Consent request unanswered after','hours']];
@@ -125,7 +126,7 @@ function admin(){if(!AD){adminLoad();return '<p>…</p>'}
  ${monitor()}<p class="m">Demo auto-joins groups. Pilot: paste invite links, mark joins, record votes. Production: WhatsApp creates groups, DMs invites, posts the pinned welcome and consent polls automatically.</p>${AD.mode==='prod'?`<p class="m"><b>WhatsApp: ${AD.wa.ready?'connected':AD.wa.started?'scan the QR code shown in the server terminal':'not installed. Run npm install, then switch to Production again'}</b></p>`:''}
  <details><summary class="opt">Operator panel (Tier 2)</summary><h2>Groups to run</h2>${gs||'<p class="m">None yet</p>'}<h2>Open consent polls</h2>${ps||'<p class="m">None</p>'}
  <h2>Families</h2><div class="card"><table>${AD.users.map(u=>`<tr><td>${E(u.name||u.id)}</td><td>${E(u.area||'')}</td><td>${u.status}</td></tr>`).join('')}</table></div>
- <h2>Email outbox</h2><div class="card">${AD.outbox.map(o=>`<p class="m"><b>${E(o.to)}</b> — ${E(o.subject)}</p>`).join('')||'—'}</div></details>`}
+ <h2>Email outbox</h2><div class="card"><input id="mt" type="email" placeholder="your email for a test"><button class="btn s" onclick="mailtest()">Send test email</button>${AD.outbox.map(o=>`<p class="m"><b>${E(o.to)}</b> — ${E(o.subject)} <i>[${E(o.status||'sent')}]</i></p>`).join('')||'—'}</div></details>`}
 const WEL='Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: 92%. General estimate for a shared home: RM936 to RM1,320 per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time.';
 const HP='Pondoku Helper',pl=(y,n,c)=>({id:'p',k:'poll',w:HP,t:'A new family would like to join. Child’s age: 13–17. About 3 km away. Group match: 90%. Tap your private link to answer. Answers are anonymous: only the tally is shown.',y,n,c});
 const SIM={

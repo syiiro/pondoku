@@ -7,7 +7,7 @@ exports.status=()=>({started:!!client,ready,qr:!!qr});
 exports.start=()=>{if(client)return;let W;
  try{W=require('whatsapp-web.js')}catch{return console.log('Tier 3 needs: npm i whatsapp-web.js qrcode-terminal')}
  Poll=W.Poll;client=new W.Client({authStrategy:new W.LocalAuth(),puppeteer: {
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    ...(process.platform === 'win32' ? { executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' } : {}),
     args: ['--no-sandbox', '--disable-setuid-sandbox']
 }});
  client.on('qr',q=>{qr=q;try{require('qrcode-terminal').generate(q,{small:true})}catch{console.log(q)}});

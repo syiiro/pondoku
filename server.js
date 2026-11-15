@@ -153,4 +153,5 @@ async function tick(){const now=Date.now(),H=36e5;
  save()}
 setInterval(()=>tick().catch(console.error),6e4);
 wa.init({db,byId,join,resolvePoll,welcome,mail,save});if(db.mode==='prod')wa.start();
-app.listen(3001,()=>console.log('Pondoku on http://localhost:3001  (admin: admin@pondoku.my / admin123)'));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT,()=>console.log(`Pondoku on http://localhost:${PORT}  (admin: admin@pondoku.my / admin123)`));

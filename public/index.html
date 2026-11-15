@@ -1,0 +1,125 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pondoku</title>
+<style>
+:root{--bg:#FDF6E9;--card:#FFFDF9;--ink:#1E242B;--gold:#F5B82E;--line:#e6d9bd;--mute:#5b6470}
+@media(prefers-color-scheme:dark){:root{--bg:#FDF6E9;--card:#FFFDF9;--ink:#1E242B}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 Georgia,'Iowan Old Style',serif}
+main{max-width:640px;margin:0 auto;padding:20px 18px 110px}
+h1{font-size:30px;line-height:1.2;margin:.4em 0}h2{font-size:24px;line-height:1.25;margin:.5em 0}p.m{color:var(--mute);font-size:16px}
+button,input,select{font:inherit;color:inherit;min-height:48px}
+.btn{background:var(--gold);border:0;border-radius:14px;padding:12px 22px;font-weight:700;cursor:pointer;width:100%}
+.btn.s{background:transparent;border:2px solid var(--line);font-weight:400;width:auto}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0;cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--ink);background:#FFF1CC}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row .opt{flex:1 1 45%}
+input,select{width:100%;padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);margin:6px 0 14px}
+label{font-weight:700;font-size:16px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+.tg{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:8px 14px;margin:10px 0;min-height:56px}
+.tg div{display:flex;gap:6px}.tg button{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:0 18px}.tg button[aria-pressed=true]{background:var(--gold);border-color:var(--ink);font-weight:700}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.help{position:fixed;right:14px;bottom:14px;background:#25D366;color:#10321c;border-radius:30px;padding:12px 20px;text-decoration:none;font:700 16px system-ui;min-height:48px;display:flex;align-items:center;box-shadow:0 2px 8px #0003}
+.err{color:#9b1c1c;font-size:16px}.wa{background:#ECE5DD;border-radius:14px;padding:12px;font:15px/1.4 system-ui}.wa b{display:block;color:#075E54;font-size:13px}.wa .m{background:#fff;border-radius:10px;padding:8px 10px;margin:6px 0}
+table{width:100%;border-collapse:collapse;font:15px system-ui}td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+</style></head><body><main id="app"></main>
+<a class="help" id="help" href="#" target="_blank" rel="noopener"></a>
+<script>
+const WA='https://wa.me/60123456789?text=';
+let L=localStorage.lang||'en',T=localStorage.tok,U=null,step=+localStorage.step||1,ans=JSON.parse(localStorage.ans||'{}'),err='',view='';
+const t=(en,bm)=>L==='bm'?bm:en;
+const $=s=>document.querySelector(s);
+const api=async(p,b,m)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:b?JSON.stringify(b):undefined});const j=await r.json();if(!r.ok)throw new Error(j.e||'Error');return j};
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const AREAS=['Batu Pahat 83000','Batu Pahat Town centre','Batu Pahat West side','Batu Pahat Far north','Johor Bahru','Shah Alam','Petaling Jaya','Kuala Lumpur','Kajang','Ipoh','George Town'];
+const Q={
+ age:[['c','Child 7–12','Kanak-kanak 7–12'],['t','Teen 13–17','Remaja 13–17'],['y','Young Adult 18–25','Dewasa Muda 18–25'],['a','Adult 26+','Dewasa 26+']],
+ gender:[['m','Male','Lelaki'],['f','Female','Perempuan']],
+ gpref:[['same','Same gender only','Jantina sama sahaja'],['mixed','Mixed group is fine','Kumpulan campuran tidak mengapa']],
+ support:[['1','Mostly independent — needs light supervision & reminders','Agak berdikari — perlukan penyeliaan ringan & peringatan'],['2','Moderate help — needs daily guidance with routines & safety','Bantuan sederhana — perlukan bimbingan harian untuk rutin & keselamatan'],['3','High help — needs hands-on assistance with daily living','Bantuan tinggi — perlukan bantuan secara langsung dalam kehidupan harian'],['4','Intensive care — needs dedicated 1-to-1 support','Penjagaan intensif — perlukan sokongan 1-ke-1']],
+ need:[['autism','Autism / Sensory','Autisme / Deria'],['down','Down Syndrome / Intellectual','Sindrom Down / Intelektual'],['physical','Physical / Mobility','Fizikal / Mobiliti'],['speech','Speech / Communication','Pertuturan / Komunikasi'],['multi','Multiple Needs','Pelbagai Keperluan']],
+ budget:[['b1','Below RM800 / month','Bawah RM800 / bulan'],['b2','RM800 – RM1,100 / month','RM800 – RM1,100 / bulan'],['b3','RM1,100 – RM1,500 / month','RM1,100 – RM1,500 / bulan'],['b4','Above RM1,500 / month','Atas RM1,500 / bulan']],
+ hours:[['office','Office hours 8am–5pm','Waktu pejabat 8pg–5ptg'],['half','Half-day mornings','Separuh hari (pagi)'],['flex','Flexible / Shift hours','Waktu fleksibel / syif'],['full','Full-time shared living','Tinggal bersama sepenuh masa']],
+ langs:[['bm','Bahasa Melayu','Bahasa Melayu'],['en','English','English'],['zh','Mandarin / Chinese dialects','Mandarin / dialek Cina'],['ta','Tamil','Tamil']]};
+const H=[['Ground-floor or wheelchair-accessible home needed?','Rumah aras bawah atau mesra kerusi roda diperlukan?'],['Comfortable with pets in the shared home?','Selesa dengan haiwan peliharaan di rumah bersama?'],['Strict halal kitchen required?','Dapur halal yang ketat diperlukan?'],['Air-conditioning needed in rest areas?','Penyaman udara diperlukan di kawasan rehat?'],['Open to hiring a shared trained caregiver together?','Bersedia mengambil penjaga terlatih bersama-sama?']];
+const TITLES=[['Language & who is filling this','Bahasa & siapa yang mengisi'],['Contact details','Butiran hubungan'],['Where are you?','Di mana anda?'],['About your child','Tentang anak anda'],['Support level & main need','Tahap sokongan & keperluan utama'],['Monthly budget','Bajet bulanan'],['Weekday routine & home languages','Rutin hari bekerja & bahasa di rumah'],['Home preferences','Pilihan rumah'],['Review & consent','Semak & persetujuan']];
+const COST=[[640,900],[936,1320],[1100,1500],[1300,1800]];
+const est=()=>COST[Math.max(0,['b1','b2','b3','b4'].indexOf(ans.budget))];
+function set(k,v){ans[k]=v;persist();render()}
+function persist(){localStorage.ans=JSON.stringify(ans);localStorage.step=step;localStorage.lang=L;if(T&&U&&U.status==='Draft')api('save',{answers:ans,step}).catch(()=>{})}
+const opts=(k,multi)=>Q[k].map(o=>{const on=multi?(ans[k]||[]).includes(o[0]):ans[k]===o[0];return `<button class="opt" aria-pressed="${on}" onclick="${multi?`tog('${k}','${o[0]}')`:`set('${k}','${o[0]}')`}">${E(t(o[1],o[2]))}</button>`}).join('');
+function tog(k,v){const a=ans[k]||[];set(k,a.includes(v)?a.filter(x=>x!==v):[...a,v])}
+const yn=i=>`<div class="tg"><span>${t(H[i][0],H[i][1])}</span><div><button aria-pressed="${ans['h'+(i+1)]===true}" onclick="set('h${i+1}',true)">${t('Yes','Ya')}</button><button aria-pressed="${ans['h'+(i+1)]===false}" onclick="set('h${i+1}',false)">${t('No','Tidak')}</button></div></div>`;
+const val=()=>{const a=ans;return[ ()=>a.lang,()=>a.name&&/^\+?60\d{8,10}$/.test((a.phone||'').replace(/[\s-]/g,''))&&/\S+@\S+\.\S+/.test(a.email||''),()=>a.area,()=>a.age&&a.gender&&a.gpref,()=>a.support&&a.need,()=>a.budget,()=>a.hours&&(a.langs||[]).length,()=>[1,2,3,4,5].every(i=>typeof a['h'+i]==='boolean'),()=>a.consent][step-1]()};
+const bind=(k,ph,type='text')=>`<input type="${type}" value="${E(ans[k]||'')}" placeholder="${ph}" oninput="ans.${k}=this.value;persist()" onblur="render()">`;
+function screen(){switch(step){
+ case 1:return `<div class="row"><button class="opt" aria-pressed="${L==='bm'}" onclick="L='bm';ans.lang='bm';set('lang','bm')">Bahasa Melayu</button><button class="opt" aria-pressed="${L==='en'}" onclick="L='en';ans.lang='en';set('lang','en')">English</button></div>
+  <button class="opt" aria-pressed="${!ans.helper}" onclick="set('helper',false)">${t('I am filling this for myself (Parent)','Saya mengisi untuk diri sendiri (Ibu bapa)')}</button>
+  <button class="opt" aria-pressed="${!!ans.helper}" onclick="set('helper',true)">${t('I am helping a relative/family fill this out (Helper Mode)','Saya membantu saudara/keluarga mengisi (Mod Pembantu)')}</button>
+  ${ans.helper?`<label>${t('Your name','Nama anda')}</label>${bind('helperName','')}<label>${t('Your relationship to the parent','Hubungan anda dengan ibu bapa')}</label>${bind('helperRel','')}`:''}`;
+ case 2:return `<label>${t('First name (of the parent)','Nama pertama (ibu bapa)')}</label>${bind('name','')}<label>${t('WhatsApp number','Nombor WhatsApp')}</label>${bind('phone','+60 12 345 6789','tel')}<label>${t('Email — we use it only to tell you about group votes and match updates','E-mel — hanya untuk makluman undian kumpulan & kemas kini padanan')}</label>${bind('email','name@example.com','email')}`;
+ case 3:return `<label>${t('Area / town','Kawasan / bandar')}</label><select onchange="set('area',this.value)"><option value="">—</option>${AREAS.map(a=>`<option ${ans.area===a?'selected':''}>${a}</option>`).join('')}</select><p class="m">${t('Your exact home address is never stored or shared—only your general area within 10 km.','Alamat rumah tepat anda tidak pernah disimpan atau dikongsi—hanya kawasan umum dalam lingkungan 10 km.')}</p>`;
+ case 4:return `<label>${t('Life stage','Peringkat hidup')}</label>${opts('age')}<label>${t('Gender','Jantina')}</label><div class="row">${opts('gender')}</div><label>${t('Group gender preference','Pilihan jantina kumpulan')}</label>${opts('gpref')}`;
+ case 5:return opts('support')+`<label>${t('Main care focus','Fokus penjagaan utama')}</label>`+opts('need');
+ case 6:return opts('budget');
+ case 7:return `<label>${t('Preferred weekday care hours','Waktu penjagaan hari bekerja')}</label>${opts('hours')}<label>${t('Languages spoken at home (pick any)','Bahasa di rumah (pilih mana-mana)')}</label><div class="row">${opts('langs',1)}</div>`;
+ case 8:return [0,1,2,3,4].map(yn).join('');
+ case 9:{const e=est(),l=k=>(Q[k].find(o=>o[0]===ans[k])||[])[L==='bm'?2:1]||'—';
+  const row=(lbl,v,s)=>`<tr><th>${lbl}</th><td>${E(v)}</td><td><button class="btn s" style="min-height:48px" onclick="step=${s};render()">${t('Edit','Ubah')}</button></td></tr>`;
+  return `<div class="card"><table>${row(t('Name','Nama'),ans.name,2)}${row(t('Area','Kawasan'),ans.area,3)}${row(t('Child','Anak'),l('age')+', '+l('gender'),4)}${row(t('Support','Sokongan'),l('support'),5)}${row(t('Budget','Bajet'),l('budget'),6)}${row(t('Routine','Rutin'),l('hours'),7)}${row(t('Home','Rumah'),[1,2,3,4,5].map(i=>ans['h'+i]?'✓':'✗').join(' '),8)}</table></div>
+  <div class="card"><b>${t('General cost estimate','Anggaran kos am')}</b><p>${t(`Estimated shared home cost: RM${e[0]} to RM${e[1]} per family per month (estimate only).`,`Anggaran kos rumah bersama: RM${e[0]} hingga RM${e[1]} sekeluarga sebulan (anggaran sahaja).`)}</p></div>
+  <div class="card"><p>${t('Only your first name and WhatsApp number will be shared, and ONLY with families you are matched with. Your address, email, and child’s medical details are never shared publicly.','Hanya nama pertama dan nombor WhatsApp anda dikongsi, dan HANYA dengan keluarga yang dipadankan. Alamat, e-mel dan butiran perubatan anak tidak akan dikongsi secara umum.')}</p>
+  <button class="opt" aria-pressed="${!!ans.consent}" onclick="set('consent',!ans.consent)">${ans.consent?'☑':'☐'} ${t('I agree to be matched into a group and share my first name and WhatsApp number with matched families only.','Saya bersetuju dipadankan dalam kumpulan dan berkongsi nama pertama & nombor WhatsApp dengan keluarga yang dipadankan sahaja.')}</button></div>`}}}
+function wizard(){const tt=TITLES[step-1];return `<div class="top"><p class="m">${t('Step','Langkah')} ${step} ${t('of','daripada')} 9</p><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><div class="bar" role="progressbar" aria-valuenow="${step}" aria-valuemax="9"><i style="width:${step/9*100}%"></i></div>
+ <h2>${t(tt[0],tt[1])}</h2>${screen()}<p class="err">${E(err)}</p>
+ <div class="row" style="margin-top:18px">${step>1?`<button class="btn s" onclick="step--;err='';render()">${t('Back','Kembali')}</button>`:''}<button class="btn" style="flex:1" ${val()?'':'disabled style="opacity:.5"'} onclick="next()">${step===9?t('Complete & Find My Match','Selesai & Cari Padanan Saya'):t('Next','Seterusnya')}</button></div>`}
+async function next(){err='';if(step<9){step++;persist();return render()}try{await api('save',{answers:ans,step});U=await api('complete',{});localStorage.removeItem('ans');render()}catch(e){err=e.message;render()}}
+const wa=(who,msg)=>`<div class="wa"><b>${who}</b><div class="m">${E(msg)}</div></div>`;
+function dash(){const s=U.status,g=U.group,e=U.estimate;let body='';
+ if(s==='Draft')return wizard();
+ if(U.waiting||(s==='Pending Consent'&&!g))body=`<h2>${t('We are checking with the group','Kami sedang menyemak dengan kumpulan')}</h2><p class="m">${t('We will email you at your registered address as soon as we hear back.','Kami akan e-mel anda sebaik sahaja ada jawapan.')}</p>`;
+ else if(s==='Available')body=`<h2>${t('You are on the list','Anda dalam senarai')}</h2><p>${t('We are looking for 2 or more compatible families near you. No need to do anything.','Kami mencari 2 atau lebih keluarga sesuai berdekatan anda. Tiada tindakan diperlukan.')}</p><div class="card">${t(`General estimate: RM${e[0]} to RM${e[1]} per family per month (estimate only).`,`Anggaran am: RM${e[0]} hingga RM${e[1]} sekeluarga sebulan (anggaran sahaja).`)}</div>`;
+ else if(s==='Pending Consent'&&g)body=`<h2>${t('Your group is ready','Kumpulan anda sudah sedia')}</h2><p>${t(`Group match: ${g.score}%. Joining is your choice, and only you decide.`,`Padanan kumpulan: ${g.score}%. Menyertai ialah pilihan anda.`)}</p>${U.invite?`<a class="btn" style="display:block;text-align:center;text-decoration:none;line-height:24px" href="${E(U.invite)}" target="_blank" rel="noopener">${t('Join the WhatsApp group','Sertai kumpulan WhatsApp')}</a>`:`<p class="m">${t('Your private invite link is being prepared.','Pautan jemputan peribadi sedang disediakan.')}</p>`}`;
+ else body=`<h2>${t('You are in a group','Anda dalam kumpulan')}</h2><p>${g.size} ${t('families','keluarga')} · ${g.score}%</p>${U.invite?`<a href="${E(U.invite)}" target="_blank" rel="noopener">WhatsApp</a>`:''}${g.welcome?wa('Pondoku Helper 📌',g.welcome):''}`;
+ return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="out()">${t('Log out','Log keluar')}</button></div><p class="m">${E(U.code||'')}</p>${body}${g?`<p><button class="btn s" onclick="leave()">${t('Leave group / Reset status','Keluar kumpulan / Set semula status')}</button></p>`:''}`}
+async function leave(){if(confirm(t('Leave this group?','Keluar dari kumpulan ini?'))){U=await api('leave',{});render()}}
+const out=()=>{localStorage.removeItem('tok');T=null;U=null;render()};
+function auth(){return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><p>${t('Shared-care family matching for parents in Malaysia. Calm, private, no typing marathons.','Padanan keluarga penjagaan bersama untuk ibu bapa di Malaysia. Tenang, peribadi, tanpa menaip panjang.')}</p>
+ <label>Email</label><input id="em" type="email" autocomplete="email"><label>${t('Password','Kata laluan')}</label><input id="pw" type="password" autocomplete="current-password"><p class="err">${E(err)}</p>
+ <div class="row"><button class="btn" style="flex:1" onclick="login('login')">${t('Log in','Log masuk')}</button><button class="btn s" onclick="login('register')">${t('Sign up','Daftar')}</button></div>`}
+async function login(p){try{const r=await api(p,{email:$('#em').value,password:$('#pw').value});T=localStorage.tok=r.token;err='';await boot()}catch(e){err=e.message;render()}}
+// ---- Admin / coordinator ----
+let AD=null;
+async function adminLoad(){AD=await api('admin/state');AD.mon=await api('admin/monitor');render()}
+const act=async(p,b)=>{await api('admin/'+p,b);adminLoad()};
+const HINT=['Shows who has been waiting longest.','Admin can reach out early and explain next steps.','A match may have been missed because the parent found the link confusing.','Stops a new family waiting without an answer.','Catches groups that need more members.'];
+const RULES=[['wait','Family Available for more than','days'],['dist','No group or compatible family within','km'],['invite','Invite not accepted within','days'],['consent','Consent request unanswered after','hours']];
+function monitor(){const m=AD.mon,k=m.kpi,tile=(n,l)=>`<div class="card" style="flex:1 1 28%;text-align:center;margin:6px 0"><div style="font-size:30px;font-weight:700">${n}</div>${l}</div>`;
+ const badge=s=>`<span style="padding:2px 10px;border-radius:10px;background:${s==='Grouped'?'#cfe8cf':'#fde3a7'}">${s}</span>`;
+ return `<h2>Monitoring</h2><div class="row">${tile(k.families,'Families')}${tile(k.available,'Available')}${tile(k.grouped,'Grouped')}${tile(k.groups,'Groups')}${tile(k.slots,'Open slots')}</div>
+ <h2>Alerts: no family left behind</h2>${m.al.map(a=>`<div class="card" style="border:2px solid #b3261e"><b>${E(a.text)}</b><p class="m">${HINT[a.rule-1]}</p></div>`).join('')||'<p class="m">No alerts</p>'}
+ <div class="card"><b>Alert thresholds</b><div class="row">${RULES.map(([key,l,u])=>`<label style="flex:1 1 45%">${l} (${u})<input type="number" min="1" value="${m.th[key]}" onchange="act('thresholds',{${key}:+this.value})"></label>`).join('')}</div><p class="m">Also alerts when a group has fewer than 3 families.</p></div>
+ <h2>Families</h2><div style="overflow-x:auto"><table><tr><th>Family</th><th>Area</th><th>Status</th><th>Group</th><th>Days waiting</th><th>Reason or note</th></tr>${m.fam.map(f=>`<tr><td>${f.code} ${E(f.name)}</td><td>${E(f.area)}</td><td>${badge(f.status)}</td><td>${f.group}</td><td>${f.days??'—'}</td><td>${E(f.note)}</td></tr>`).join('')}</table></div>
+ <h2>Groups</h2><div style="overflow-x:auto"><table><tr><th>Group</th><th>Area</th><th>Members</th><th>Open slots</th><th>Average score</th><th>Status and pending items</th></tr>${m.grp.map(g=>`<tr><td>${g.name}</td><td>${E(g.area)}</td><td>${g.members}</td><td>${g.open}</td><td>${g.avg}</td><td>${E(g.note)}</td></tr>`).join('')}</table></div>
+ <p><button class="btn s" onclick="if(confirm('Replace all families with the demo data?'))act('seed',{})">Reset to Batu Pahat demo data</button></p>`}
+function admin(){if(!AD){adminLoad();return '<p>…</p>'}
+ const gs=AD.groups.map(g=>`<div class="card"><b>Group ${g.id}</b> · ${g.names.join(', ')} · ${g.score}% · ${g.members.length}/5 ${g.welcomed?'· 📌 welcomed':''}
+  <p class="m">${g.joined.length} joined</p>
+  ${AD.mode!=='demo'&&!Object.values(g.invites).every(i=>i.sent)?`<input id="l${g.id}" placeholder="https://chat.whatsapp.com/..."><button class="btn" onclick="act('invite',{groupId:'${g.id}',url:$('#l${g.id}').value})">Send invite links by email</button>`:''}
+  ${g.members.filter(m=>!g.joined.includes(m)).map(m=>`<button class="btn s" onclick="act('joined',{groupId:'${g.id}',userId:'${m}'})">Mark ${m} joined</button>`).join(' ')}
+  <p><button class="btn s" onclick="navigator.clipboard.writeText(${E(JSON.stringify(g.welcome)).replace(/'/g,'&#39;')});this.textContent='Copied ✓'">Copy Welcome Message</button></p>${g.welcomed?wa('Pondoku Helper 📌',g.welcome):''}</div>`).join('');
+ const ps=AD.polls.map(p=>{const g=AD.groups.find(x=>x.id===p.groupId);return `<div class="card"><b>Consent poll → ${g.id}</b> (${p.rule})<p class="m">Anonymous tally: ${p.tally.yes} yes · ${p.tally.no} no · ${p.tally.total-p.tally.yes-p.tally.no} waiting</p>
+  ${wa('Pondoku Helper',`A new family would like to join. Child age ${p.info.age}, about ${p.info.km} km away, group match ${p.info.score}%. Tap your private link to answer. Answers are anonymous.`)}
+  ${g.members.map(m=>`<div class="row"><span style="flex:1">Member ${m}</span><button class="btn s" onclick="act('vote',{pollId:'${p.id}',memberId:'${m}',yes:true})">Yes</button><button class="btn s" onclick="act('vote',{pollId:'${p.id}',memberId:'${m}',yes:false})">No</button></div>`).join('')}</div>`}).join('');
+ return `<div class="top"><h1>Coordinator</h1><button class="btn s" onclick="out()">Log out</button></div>
+ <div class="row">${['demo','pilot','prod'].map(m=>`<button class="opt" aria-pressed="${AD.mode===m}" onclick="act('mode',{mode:'${m}'})">${{demo:'Tier 1 · Demo',pilot:'Tier 2 · Pilot',prod:'Tier 3 · Production'}[m]}</button>`).join('')}</div>
+ ${monitor()}<p class="m">Demo auto-joins groups. Pilot: paste invite links, mark joins, record votes. Production: WhatsApp automation is a stub; use Pilot controls.</p>
+ <details><summary class="opt">Operator panel (Tier 2)</summary><h2>Groups to run</h2>${gs||'<p class="m">None yet</p>'}<h2>Open consent polls</h2>${ps||'<p class="m">None</p>'}
+ <h2>Families</h2><div class="card"><table>${AD.users.map(u=>`<tr><td>${E(u.name||u.id)}</td><td>${E(u.area||'')}</td><td>${u.status}</td></tr>`).join('')}</table></div>
+ <h2>Email outbox</h2><div class="card">${AD.outbox.map(o=>`<p class="m"><b>${E(o.to)}</b> — ${E(o.subject)}</p>`).join('')||'—'}</div></details>`}
+function render(){$('#app').innerHTML=!T||!U?auth():U.role==='admin'?admin():dash();
+ document.documentElement.lang=L==='bm'?'ms':'en';$('#help').textContent=t('Need help?','Perlukan bantuan?');$('#help').href=WA+encodeURIComponent('Hi Pondoku, I need help');
+ const f=document.activeElement;}
+async function boot(){if(!T)return render();try{U=await api('me');if(U.role==='parent'&&U.status==='Draft'){ans={...U.answers,...ans};step=Math.max(U.step||1,step);L=ans.lang||L}}catch{T=null}render()}
+boot();setInterval(()=>{if(U&&T&&U.role==='admin')adminLoad();else if(U&&U.status!=='Draft')api('me').then(u=>{U=u;render()})},15000);
+</script></body></html>

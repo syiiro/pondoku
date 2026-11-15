@@ -1,0 +1,585 @@
+{
+ "users": [
+  {
+   "id": "u1",
+   "email": "admin@pondoku.my",
+   "pw": "a1e4f5eddcb93cc3:e9a76986311757a12a07c670d63fb66e1dcc9b5511f2e0bc79c24ddc9b5a1af7",
+   "role": "admin",
+   "status": "Draft",
+   "answers": {},
+   "step": 1
+  },
+  {
+   "id": "u2",
+   "code": "F1",
+   "email": "f1@demo.my",
+   "pw": "d2b25761a7894a91:0e07b3f9edcd59a5db3b72772996cac8d9faa3d33fe9a019178dd02166c28c71",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "1",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Aisyah",
+    "area": "Batu Pahat Town centre",
+    "email": "f1@demo.my"
+   },
+   "groupId": "g13"
+  },
+  {
+   "id": "u3",
+   "code": "F2",
+   "email": "f2@demo.my",
+   "pw": "88b3a4d231207f4a:96824f584e2b6583dceddbd9fbca6b2bffcd86dde17e3c82c67717aff251b672",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "2",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Mei Ling",
+    "area": "Batu Pahat Town centre",
+    "email": "f2@demo.my"
+   },
+   "groupId": "g13"
+  },
+  {
+   "id": "u4",
+   "code": "F3",
+   "email": "f3@demo.my",
+   "pw": "bda02a0ed6a0c5bd:6dc9deb2b37ca04147b46d3382fb93295abd4fc9db8d790b43e97afc0b2a60b7",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "3",
+    "need": "autism",
+    "budget": "b3",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Kumar",
+    "area": "Batu Pahat Town centre",
+    "email": "f3@demo.my"
+   },
+   "groupId": "g13"
+  },
+  {
+   "id": "u5",
+   "code": "F4",
+   "email": "f4@demo.my",
+   "pw": "38942edc62a0deb2:2a5b7bab77b494364708da813a0bf6418d0f0cfd063dec92265b0bc17c914c75",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "1",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Hafiz",
+    "area": "Batu Pahat Town centre",
+    "email": "f4@demo.my"
+   },
+   "groupId": "g13"
+  },
+  {
+   "id": "u6",
+   "code": "F5",
+   "email": "f5@demo.my",
+   "pw": "e5bfab38f8b1c0b9:2597fd5ce78de196055a57fc6c4eca2a9003b545f31e316402016a5bdcd81f8f",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "2",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Siti",
+    "area": "Batu Pahat Town centre",
+    "email": "f5@demo.my"
+   },
+   "groupId": "g13"
+  },
+  {
+   "id": "u7",
+   "code": "F6",
+   "email": "f6@demo.my",
+   "pw": "018d96dc70bac98a:1a3608b0805e1dd703f8ad8cd1175a87003c22624bbcb21f114861fcdc7e46c8",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "3",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Farah",
+    "area": "Batu Pahat West side",
+    "email": "f6@demo.my"
+   },
+   "groupId": "g14"
+  },
+  {
+   "id": "u8",
+   "code": "F7",
+   "email": "f7@demo.my",
+   "pw": "1f88ccbad479d075:44323a635c78144385b9daa15ad1ee741ec0093b9e998fdab68c8ba47748109a",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "1",
+    "need": "autism",
+    "budget": "b3",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Wong",
+    "area": "Batu Pahat West side",
+    "email": "f7@demo.my"
+   },
+   "groupId": "g14"
+  },
+  {
+   "id": "u9",
+   "code": "F8",
+   "email": "f8@demo.my",
+   "pw": "f64e282956f97c3b:e7369c9f0f7d9da56a103a2fcfd127833cde36cf6ed62b00b9f277848f2fc5c3",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "2",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Devi",
+    "area": "Batu Pahat West side",
+    "email": "f8@demo.my"
+   },
+   "groupId": "g14"
+  },
+  {
+   "id": "u10",
+   "code": "F9",
+   "email": "f9@demo.my",
+   "pw": "09b37637e00f350b:601982c47ce3ee0ffaef9956ba1ec83c6c66bed1d58d7e7ba5bda625b13bd4a0",
+   "role": "parent",
+   "status": "Grouped",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "3",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Azlan",
+    "area": "Batu Pahat West side",
+    "email": "f9@demo.my"
+   },
+   "groupId": "g14"
+  },
+  {
+   "id": "u11",
+   "code": "F10",
+   "email": "f10@demo.my",
+   "pw": "f5fb3bdd1f6976ff:db23f0492c50a9397228277f5e865c47b38ee67485cb08cbc8204cd4c5a96fa7",
+   "role": "parent",
+   "status": "Available",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "1",
+    "need": "autism",
+    "budget": "b2",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Noraini",
+    "area": "Batu Pahat Far north",
+    "email": "f10@demo.my"
+   },
+   "since": 1792887525055
+  },
+  {
+   "id": "u12",
+   "code": "F11",
+   "email": "f11@demo.my",
+   "pw": "dfe0975d72230973:ca6d42238fb0b88ebb3b6c71f578b1aad993bc0499835291a214e5d1a04faaa3",
+   "role": "parent",
+   "status": "Pending Consent",
+   "step": 9,
+   "answers": {
+    "lang": "en",
+    "age": "t",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "2",
+    "need": "autism",
+    "budget": "b3",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": true,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true,
+    "phone": "+60123456789",
+    "name": "Lim",
+    "area": "Batu Pahat West side",
+    "email": "f11@demo.my"
+   },
+   "since": 1794701925055,
+   "groupId": null
+  },
+  {
+   "id": "u17",
+   "code": "F12",
+   "email": "hagiyo11@gmail.com",
+   "pw": "0a2c2e0b83e17d97:ace0d59efc252a9cc2c26ad104e9696eac8adcca4902985a5aa499bcf5c4987f",
+   "role": "parent",
+   "status": "Available",
+   "answers": {
+    "lang": "en",
+    "helper": false,
+    "name": "Abu Bakar",
+    "phone": "60145936560",
+    "email": "hagiyo11@gmail.com",
+    "area": "Kuala Lumpur",
+    "age": "c",
+    "gender": "m",
+    "gpref": "mixed",
+    "support": "2",
+    "need": "autism",
+    "budget": "b3",
+    "hours": "office",
+    "langs": [
+     "bm",
+     "en"
+    ],
+    "h1": false,
+    "h2": false,
+    "h3": true,
+    "h4": true,
+    "h5": true,
+    "consent": true
+   },
+   "step": 9,
+   "contactEmail": "hagiyo11@gmail.com",
+   "since": 1794704165238
+  }
+ ],
+ "groups": [
+  {
+   "id": "g13",
+   "name": "Group 1",
+   "members": [
+    "u2",
+    "u3",
+    "u4",
+    "u5",
+    "u6"
+   ],
+   "invites": {
+    "u2": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925046
+    },
+    "u3": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925046
+    },
+    "u4": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925046
+    },
+    "u5": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925046
+    },
+    "u6": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925046
+    }
+   },
+   "joined": [
+    "u2",
+    "u3",
+    "u4",
+    "u5",
+    "u6"
+   ],
+   "welcomed": true,
+   "hold": null,
+   "created": 1794701925046,
+   "welcomeText": "Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: 92%. General estimate for a shared home: RM936 to RM1320 per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time."
+  },
+  {
+   "id": "g14",
+   "name": "Group 2",
+   "members": [
+    "u7",
+    "u8",
+    "u9",
+    "u10"
+   ],
+   "invites": {
+    "u7": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925055
+    },
+    "u8": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925055
+    },
+    "u9": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925055
+    },
+    "u10": {
+     "url": null,
+     "sent": true,
+     "at": 1794701925055
+    }
+   },
+   "joined": [
+    "u7",
+    "u8",
+    "u9",
+    "u10"
+   ],
+   "welcomed": true,
+   "hold": "u12",
+   "created": 1794701925055,
+   "welcomeText": "Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: 90%. General estimate for a shared home: RM936 to RM1320 per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time."
+  }
+ ],
+ "polls": [
+  {
+   "id": "p15",
+   "groupId": "g14",
+   "userId": "u12",
+   "rule": "unanimous",
+   "votes": {
+    "u7": true,
+    "u10": false
+   },
+   "created": 1794694725055,
+   "reminded": false,
+   "done": true,
+   "info": {
+    "age": "13–17",
+    "km": 1,
+    "score": 90
+   },
+   "result": "not approved"
+  },
+  {
+   "id": "p16",
+   "groupId": "g14",
+   "userId": "u12",
+   "rule": "unanimous",
+   "votes": {},
+   "created": 1794703309103,
+   "reminded": false,
+   "done": false,
+   "info": {
+    "age": "13–17",
+    "km": 0,
+    "score": 89
+   }
+  }
+ ],
+ "outbox": [
+  {
+   "to": "f11@demo.my",
+   "subject": "Pondoku: update",
+   "text": "This group is not available. We will keep looking.",
+   "at": 1794703309099
+  },
+  {
+   "to": "f11@demo.my",
+   "subject": "Pondoku: we are checking with the group",
+   "text": "We are checking with the group. We will email you as soon as we hear back.",
+   "at": 1794703309103
+  }
+ ],
+ "sessions": {
+  "79faa2be96e03a6b4d8237f0fd5950ff": "u1",
+  "514ab58c25233e8d5ba5c2d223d9f6ea": "u2",
+  "a2717ea25754b3bc4cf247d45d939b1a": "u6",
+  "d7a03e783f5af8c499874a770b7a416f": "u4",
+  "b28e0b3ed0b654d0bda028a91f589036": "u1",
+  "0e4ebdc718c2a970125292cc7deab616": "u17",
+  "58242b16f5b3fabdd54009140399abb6": "u17",
+  "3550655685f0617421f4175d1a8ce2d9": "u1"
+ },
+ "mode": "prod",
+ "n": 17,
+ "th": {
+  "wait": 14,
+  "dist": 15,
+  "invite": 7,
+  "consent": 48
+ }
+}

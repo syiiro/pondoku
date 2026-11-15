@@ -21,8 +21,16 @@ label{font-weight:700;font-size:16px}
 .help{position:fixed;right:14px;bottom:14px;background:#25D366;color:#10321c;border-radius:30px;padding:12px 20px;text-decoration:none;font:700 16px system-ui;min-height:48px;display:flex;align-items:center;box-shadow:0 2px 8px #0003}
 .err{color:#9b1c1c;font-size:16px}.wa{background:#ECE5DD;border-radius:14px;padding:12px;font:15px/1.4 system-ui}.wa b{display:block;color:#075E54;font-size:13px}.wa .m{background:#fff;border-radius:10px;padding:8px 10px;margin:6px 0}
 table{width:100%;border-collapse:collapse;font:15px system-ui}td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+.ph{max-width:360px;margin:0 auto;border:8px solid var(--ink);border-radius:30px;overflow:hidden;background:#ECE5DD;font:15px/1.4 system-ui}
+.ph header{background:#075E54;color:#fff;padding:10px 14px}.ph header small{display:block;opacity:.85}
+.ph .pin{background:#fff;padding:6px 12px;border-bottom:1px solid #ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .chat{height:380px;overflow-y:auto;padding:10px}.ph .sys{text-align:center;margin:8px 0}.ph .sys span{background:#e1f2fb;border-radius:8px;padding:3px 10px;font-size:13px;display:inline-block}
+.ph .b{background:#fff;border-radius:10px;padding:8px 10px;margin:6px 0;max-width:92%}.ph .b b{display:block;color:#075E54;font-size:13px}
+.ph .o{position:relative;background:#eee;border-radius:6px;margin:6px 0;padding:6px 8px;overflow:hidden}.ph .o i{position:absolute;inset:0 auto 0 0;background:#9fd8b0;opacity:.7}.ph .o span{position:relative;display:flex;justify-content:space-between}
+.ov{position:fixed;inset:0;background:#1E242Bcc;z-index:20;overflow:auto;padding:16px}.ov .card{max-width:420px;margin:0 auto}
 :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 </style></head><body><main id="app"></main>
+<button id="simb" class="help" style="left:14px;right:auto;border:0;cursor:pointer;background:var(--gold);color:var(--ink)" onclick="openSim()"></button><div id="sim"></div>
 <a class="help" id="help" href="#" target="_blank" rel="noopener"></a>
 <script>
 const WA='https://wa.me/60123456789?text=';
@@ -113,12 +121,29 @@ function admin(){if(!AD){adminLoad();return '<p>…</p>'}
   ${g.members.map(m=>`<div class="row"><span style="flex:1">Member ${m}</span><button class="btn s" onclick="act('vote',{pollId:'${p.id}',memberId:'${m}',yes:true})">Yes</button><button class="btn s" onclick="act('vote',{pollId:'${p.id}',memberId:'${m}',yes:false})">No</button></div>`).join('')}</div>`}).join('');
  return `<div class="top"><h1>Coordinator</h1><button class="btn s" onclick="out()">Log out</button></div>
  <div class="row">${['demo','pilot','prod'].map(m=>`<button class="opt" aria-pressed="${AD.mode===m}" onclick="act('mode',{mode:'${m}'})">${{demo:'Tier 1 · Demo',pilot:'Tier 2 · Pilot',prod:'Tier 3 · Production'}[m]}</button>`).join('')}</div>
- ${monitor()}<p class="m">Demo auto-joins groups. Pilot: paste invite links, mark joins, record votes. Production: WhatsApp automation is a stub; use Pilot controls.</p>
+ ${monitor()}<p class="m">Demo auto-joins groups. Pilot: paste invite links, mark joins, record votes. Production: WhatsApp creates groups, DMs invites, posts the pinned welcome and consent polls automatically.</p>${AD.mode==='prod'?`<p class="m"><b>WhatsApp: ${AD.wa.ready?'connected':AD.wa.started?'scan the QR code shown in the server terminal':'not installed. Run npm install, then switch to Production again'}</b></p>`:''}
  <details><summary class="opt">Operator panel (Tier 2)</summary><h2>Groups to run</h2>${gs||'<p class="m">None yet</p>'}<h2>Open consent polls</h2>${ps||'<p class="m">None</p>'}
  <h2>Families</h2><div class="card"><table>${AD.users.map(u=>`<tr><td>${E(u.name||u.id)}</td><td>${E(u.area||'')}</td><td>${u.status}</td></tr>`).join('')}</table></div>
  <h2>Email outbox</h2><div class="card">${AD.outbox.map(o=>`<p class="m"><b>${E(o.to)}</b> — ${E(o.subject)}</p>`).join('')||'—'}</div></details>`}
+const WEL='Welcome! I’m Pondoku Helper. You were matched because you live close to each other and have similar needs. Group match: 92%. General estimate for a shared home: RM936 to RM1,320 per family per month (estimate only). From here, you decide everything together: who leads, house rules and costs. I will stay quietly in this group. You can leave at any time.';
+const HP='Pondoku Helper',pl=(y,n,c)=>({id:'p',k:'poll',w:HP,t:'A new family would like to join. Child’s age: 13–17. About 3 km away. Group match: 90%. Tap your private link to answer. Answers are anonymous: only the tally is shown.',y,n,c});
+const SIM={
+ A:{n:'New group',s:[{k:'sys',t:'Pondoku Helper created this group',c:'Group created privately. Each parent gets a personal invite link. Joining is voluntary.'},{k:'sys',t:'Aisyah joined using this group’s invite link',c:'Nothing is posted until at least 3 families have joined.'},{k:'sys',t:'Mei Ling joined using this group’s invite link'},{k:'sys',t:'Kumar joined using this group’s invite link',c:'Three families have joined, so the welcome is posted now.'},{k:'msg',w:HP,t:WEL,pin:1,c:'The welcome contains no addresses, phone numbers or health details. It is pinned.'},{k:'sys',t:'Siti joined using this group’s invite link',c:'Status becomes Grouped, the admin dashboard updates, and the helper stays quiet.'}]},
+ B:{n:'Join: approved',s:[pl(0,0,'The slot is held. Only age range, rough distance and match score are shared. No phone numbers, addresses or health details.'),pl(1,0),pl(2,0),pl(3,0),pl(4,0,'Every current member must say Yes. Only the tally is shown, never who voted.'),{k:'msg',w:HP,t:'Everyone said yes. Thank you! A private invite link is on its way to the new family.',c:'The new parent gets their link and an email.'},{k:'sys',t:'A new family joined using this group’s invite link'},{k:'msg',w:HP,t:'Please welcome our newest family 👋 The group now has 5 families. General estimate: RM936 to RM1,320 per family per month (estimate only).',c:'The group’s cost estimate is updated for the new member count.'}]},
+ C:{n:'Join: no reply',s:[pl(0,0,'Same request as before. Watch what happens with silence.'),pl(2,0),{k:'msg',w:HP,t:'Friendly reminder: 2 members have not answered yet. Silence is never counted as a yes.',c:'One reminder after 24 hours.'},pl(3,0),{k:'msg',w:HP,t:'48 hours have passed and not everyone said yes, so this request is closed. Thank you. No individual answers are shared.',c:'The new family is told kindly: “This group is not available. We will keep looking.” Their status returns to Available.'}]}};
+let sim=null;
+const openSim=()=>{sim={f:'A',n:1};drawSim()};
+function drawSim(){if(!sim){$('#sim').innerHTML='';return}
+ const S=SIM[sim.f].s,it=[];S.slice(0,sim.n).forEach(s=>{const i=s.id?it.findIndex(x=>x.id===s.id):-1;i>=0?it[i]=s:it.push(s)});
+ const pin=it.filter(x=>x.pin).pop(),bub=s=>s.k==='sys'?`<div class="sys"><span>${E(s.t)}</span></div>`:`<div class="b"><b>${s.w}</b>${E(s.t)}${s.k==='poll'?[['Yes',s.y],['No',s.n]].map(([l,v])=>`<div class="o"><i style="width:${v/4*100}%"></i><span><span>${l}</span><span>${v}</span></span></div>`).join('')+`<small>${s.y+s.n} of 4 answered</small>`:''}</div>`;
+ const cap=[...S.slice(0,sim.n)].reverse().find(s=>s.c)?.c||'';
+ $('#sim').innerHTML=`<div class="ov" role="dialog" aria-label="WhatsApp preview"><div class="card"><div class="row">${Object.entries(SIM).map(([k,v])=>`<button class="opt" style="flex:1 1 30%;margin:4px 0" aria-pressed="${sim.f===k}" onclick="sim={f:'${k}',n:1};drawSim()">${v.n}</button>`).join('')}</div>
+ <div class="ph"><header><b>Group 3 · Pondoku</b><small>Pondoku Helper, Aisyah, Mei Ling, Kumar</small></header>${pin?`<div class="pin">📌 ${E(pin.t)}</div>`:''}<div class="chat" id="ch">${it.map(bub).join('')}</div></div>
+ <p>${E(cap)}</p><p class="m">${t('Preview only. Nothing is sent.','Pratonton sahaja. Tiada apa dihantar.')}</p>
+ <div class="row"><button class="btn" style="flex:1" ${sim.n>=S.length?'disabled style="opacity:.5"':''} onclick="sim.n++;drawSim()">${t('Next','Seterusnya')}</button><button class="btn s" onclick="sim.n=1;drawSim()">${t('Restart','Mula semula')}</button><button class="btn s" onclick="sim=null;drawSim()">${t('Close','Tutup')}</button></div></div></div>`;
+ const c=$('#ch');if(c)c.scrollTop=c.scrollHeight}
 function render(){$('#app').innerHTML=!T||!U?auth():U.role==='admin'?admin():dash();
- document.documentElement.lang=L==='bm'?'ms':'en';$('#help').textContent=t('Need help?','Perlukan bantuan?');$('#help').href=WA+encodeURIComponent('Hi Pondoku, I need help');
+ document.documentElement.lang=L==='bm'?'ms':'en';$('#help').textContent=t('Need help?','Perlukan bantuan?');$('#simb').textContent=t('WhatsApp preview','Pratonton WhatsApp');$('#help').href=WA+encodeURIComponent('Hi Pondoku, I need help');
  const f=document.activeElement;}
 async function boot(){if(!T)return render();try{U=await api('me');if(U.role==='parent'&&U.status==='Draft'){ans={...U.answers,...ans};step=Math.max(U.step||1,step);L=ans.lang||L}}catch{T=null}render()}
 boot();setInterval(()=>{if(U&&T&&U.role==='admin')adminLoad();else if(U&&U.status!=='Draft')api('me').then(u=>{U=u;render()})},15000);

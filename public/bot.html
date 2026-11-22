@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pondoku · WhatsApp bot simulator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#efeae2;color:#111b21}
+header{background:#075e54;color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0 auto 0 0}header button{background:#25d366;color:#08331f;border:0;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px;max-width:1200px;margin:auto}
+@media(max-width:800px){.wrap{grid-template-columns:1fr}}
+.phone{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:78vh;min-height:420px;box-shadow:0 1px 3px #0002}
+.top{background:#f0f2f5;padding:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #ddd}
+.top b{font-size:13px;color:#54656f;width:100%}
+select,input{font:inherit;padding:8px;border:1px solid #ccc;border-radius:8px;min-width:0}select{flex:1}
+.top button,.send button{background:#00a884;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600}
+.msgs{flex:1;overflow:auto;padding:12px;background:#efeae2;display:flex;flex-direction:column;gap:6px}
+.m{max-width:82%;padding:7px 10px;border-radius:8px;white-space:pre-wrap;box-shadow:0 1px 1px #0001}
+.m.bot{background:#fff;align-self:flex-start}.m.me{background:#d9fdd3;align-self:flex-end}
+.m small{display:block;color:#667781;font-size:11px;text-align:right}
+.poll{border-top:1px solid #eee;margin-top:6px;padding-top:6px}.poll div{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0;font-size:13px}
+.poll button{border:1px solid #00a884;background:#fff;color:#00a884;border-radius:6px;padding:2px 8px;cursor:pointer}.poll button.on{background:#00a884;color:#fff}
+.send{display:flex;gap:8px;padding:10px;background:#f0f2f5}.send input{flex:1}
+.info{font-size:12px;color:#54656f;padding:4px 10px;background:#fff8d6}
+.login{max-width:360px;margin:60px auto;background:#fff;padding:24px;border-radius:14px;display:grid;gap:10px}
+</style></head><body>
+<div id="app"></div>
+<script>
+let T=localStorage.botTok||'',S=null,me=localStorage.botMe||'',grp=localStorage.botGrp||'';
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])),
+ fmt=s=>esc(s).replace(/\*([^*\n]+)\*/g,'<b>$1</b>'),time=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+async function api(p,b){const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'Content-Type':'application/json',Authorization:'Bearer '+T},body:b&&JSON.stringify(b)});
+ const j=await r.json().catch(()=>({}));if(r.status===401){T='';draw();throw 0}if(!r.ok){alert(j.e||'Error');throw 0}return j}
+function login(){$('#app').innerHTML=`<form class="login" onsubmit="doLogin(event)"><h2 style="margin:0">Bot simulator</h2><p style="margin:0;color:#667781">Log in as the Pondoku admin.</p>
+ <input id="em" value="admin@pondoku.my"><input id="pw" type="password" placeholder="Password"><button class="top" style="background:#00a884;color:#fff;border:0;border-radius:8px;padding:10px">Log in</button></form>`}
+async function doLogin(e){e.preventDefault();const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:$('#em').value,password:$('#pw').value})});
+ const j=await r.json();if(!r.ok)return alert(j.e);T=localStorage.botTok=j.token;load()}
+async function load(){if(!T)return login();S=await api('bot/state');draw()}
+function draw(){if(!T)return login();
+ const keep=$('#txt')?.value||'';
+ const fam=S.families.find(f=>f.id===me)||S.families[0];me=fam?.id||'';const g=S.groups.find(x=>x.id===grp)||S.groups[0];grp=g?.id||'';
+ localStorage.botMe=me;localStorage.botGrp=grp;
+ const dm=S.chats.filter(c=>c.chat==='dm:'+me),gc=S.chats.filter(c=>c.chat==='group:'+grp);
+ const poll=id=>S.polls.find(p=>p.id===id);
+ const pollBox=(c)=>{const p=poll(c.pollId);if(!p)return '<div class="poll"><i style="color:#667781">Poll closed</i></div>';
+  return '<div class="poll"><b style="font-size:12px">Vote as each member:</b>'+g.members.map(m=>{const v=p.votes[m.id];
+   return `<div>${esc(m.name)}<span><button class="${v===true?'on':''}" onclick="vote('${p.id}','${m.id}',1)">Yes</button> <button class="${v===false?'on':''}" onclick="vote('${p.id}','${m.id}',0)">No</button></span></div>`}).join('')+'</div>'};
+ const bubble=(c,mine)=>`<div class="m ${mine?'me':'bot'}">${c.from==='bot'?'<b style="color:#075e54;font-size:12px">Pondoku Helper</b>\n':''}${fmt(c.text)}${c.pollId?pollBox(c):''}<small>${time(c.at)}</small></div>`;
+ $('#app').innerHTML=`<header><h1>Pondoku · WhatsApp bot simulator</h1>
+  <span style="font-size:12px">Mode: ${esc(S.mode)}${S.mode==='prod'?' (also sending on real WhatsApp)':''}</span>
+  <button onclick="reset()">Reset bot demo</button><button onclick="T='';localStorage.botTok='';draw()" style="background:#fff">Log out</button></header>
+ <div class="wrap">
+  <div class="phone">
+   <div class="top"><b>👤 Parent's phone: private chat with the bot</b>
+    <select onchange="me=this.value;draw()">${S.families.map(f=>`<option value="${f.id}" ${f.id===me?'selected':''}>${esc(f.name)} · ${esc(f.area)} · ${esc(f.status)}</option>`).join('')}</select>
+    <button onclick="start()">Pretend they just registered</button></div>
+   <div class="info">Bot state: <b>${esc(fam?.bot||'not started')}</b>${fam?.groupId?' · in '+esc(S.groups.find(x=>x.id===fam.groupId)?.name):''}</div>
+   <div class="msgs" id="dm">${dm.map(c=>bubble(c,c.from!=='bot')).join('')||'<i style="color:#667781">No messages yet. Click "Pretend they just registered".</i>'}</div>
+   <form class="send" onsubmit="reply(event)"><input id="txt" placeholder="Type a reply, e.g. 1" autocomplete="off"><button>Send</button></form>
+  </div>
+  <div class="phone">
+   <div class="top"><b>👥 Group chat</b>
+    <select onchange="grp=this.value;draw()">${S.groups.map(x=>`<option value="${x.id}" ${x.id===grp?'selected':''}>${esc(x.name)} (${x.members.length}/5)${x.hold?' · voting':''}</option>`).join('')}</select></div>
+   <div class="info">Members: ${g?g.members.map(m=>esc(m.name)).join(', '):'—'}</div>
+   <div class="msgs" id="gc">${gc.map(c=>bubble(c,false)).join('')||'<i style="color:#667781">No bot messages in this group yet.</i>'}</div>
+  </div>
+ </div>`;
+ for(const id of['dm','gc']){const e=$('#'+id);e.scrollTop=e.scrollHeight}
+ const t=$('#txt');t.value=keep;if(keep||document.activeElement===document.body)t.focus()}
+async function start(){await api('bot/start',{userId:me});load()}
+async function reply(e){e.preventDefault();const t=$('#txt').value.trim();if(!t)return;$('#txt').value='';await api('bot/reply',{userId:me,text:t});load()}
+async function vote(pollId,memberId,yes){await api('admin/vote',{pollId,memberId,yes:!!yes});load()}
+async function reset(){if(!confirm('Reset all demo data?'))return;await api('bot/seed',{});localStorage.botMe='';me='';load()}
+load();setInterval(()=>{if(T&&document.activeElement?.id!=='txt')load().catch(()=>{})},3000);
+</script></body></html>

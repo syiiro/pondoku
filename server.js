@@ -1,6 +1,6 @@
 // Pondoku — Express + JSON storage. Run: npm i && npm start  (http://localhost:3001)
 const express=require('express'),fs=require('fs'),crypto=require('crypto'),nodemailer=require('nodemailer');
-const wa=require('./wa');
+const wa=require('./wa'),bot=require('./bot');
 const app=express();
 // Allow teammate's external frontend (Vercel/Netlify/localhost) to call this API
 app.use((q,r,n)=>{r.setHeader('Access-Control-Allow-Origin','*');r.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');r.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');if(q.method==='OPTIONS')return r.sendStatus(204);n()});
@@ -78,9 +78,9 @@ async function resolvePoll(p,force){if(p.done)return;const g=db.groups.find(x=>x
  const approved=p.rule==='majority'?yes>n/2&&(force||vs.length===n):yes===n;
  const declined=p.rule==='majority'?(vs.length===n&&yes<=n/2):vs.some(v=>!v);
  if(approved){p.done=true;p.result='approved';g.members.push(u.id);g.invites[u.id]={url:null,sent:false};g.hold=null;u.groupId=g.id;u.status='Pending Consent';if(db.mode==='prod')wa.dmInvite(g,u).catch(console.error);
-  await mail(u,'Pondoku: you were approved','Good news. Your invite link will arrive shortly.')}
+  await mail(u,'Pondoku: you were approved','Good news. Your invite link will arrive shortly.');if(p.via==='bot')await bot.approved(u,g)}
  else if(declined||force){p.done=true;p.result='not approved';g.hold=null;u.status='Available';u.groupId=null;
-  await mail(u,'Pondoku: update','This group is not available. We will keep looking.');await match(u)}}
+  await mail(u,'Pondoku: update','This group is not available. We will keep looking.');if(p.via==='bot')await bot.declined(u,g);else await match(u)}}
 
 // ---- API ----
 const auth=(q,r,n)=>{const uid=db.sessions[(q.headers.authorization||'').replace('Bearer ','')];const u=uid&&byId(uid);if(!u)return r.status(401).json({e:'login'});q.u=u;n()};
@@ -97,7 +97,7 @@ app.post('/api/save',auth,(q,r)=>{if(q.u.status!=='Draft')return r.json(pub(q.u)
 app.post('/api/complete',auth,async(q,r)=>{const a=q.u.answers;if(!a.consent)return r.status(400).json({e:'Consent is required'});
  for(const k of['name','phone','email','area','age','gender','gpref','support','need','budget','hours'])if(!a[k])return r.status(400).json({e:'Missing: '+k});
  if(!/^\+?60\d{8,10}$/.test(String(a.phone).replace(/[\s-]/g,'')))return r.status(400).json({e:'Phone must be a Malaysian number (+60...)'});
- q.u.status='Available';await match(q.u);save();r.json(pub(q.u))});
+ q.u.status='Available';if(db.flow==='auto')await match(q.u);else await bot.start(q.u);save();r.json(pub(q.u))});
 // Admin / coordinator
 app.get('/api/admin/state',auth,adm,(q,r)=>r.json({mode:db.mode,wa:wa.status(),
  users:db.users.filter(u=>u.role==='parent').map(u=>({id:u.id,name:u.answers.name,area:u.answers.area,status:u.status,groupId:u.groupId})),
@@ -162,5 +162,17 @@ async function tick(){const now=Date.now(),H=36e5;
   if(now-i.at>7*24*H){g.members=g.members.filter(x=>x!==uid);delete g.invites[uid];u.status='Available';u.groupId=null;await match(u)}}
  save()}
 setInterval(()=>tick().catch(console.error),6e4);
-wa.init({db,byId,join,resolvePoll,welcome,mail,save});if(db.mode==='prod')wa.start();
+wa.init({db,byId,join,resolvePoll,welcome,mail,save,bot});
+bot.init({db,byId,score,km,join,save,seed,id,buildCluster,makeGroup,wa});
+// ---- WhatsApp bot simulator API (used by /bot.html, admin only) ----
+app.get('/api/bot/state',auth,adm,(q,r)=>r.json({mode:db.mode,wa:wa.status(),chats:db.chats||[],
+ families:db.users.filter(u=>u.role==='parent').map(u=>({id:u.id,name:u.answers.name,area:u.answers.area,status:u.status,groupId:u.groupId,bot:u.bot?.state||null})),
+ groups:db.groups.map(g=>({id:g.id,name:g.name,members:g.members.map(i=>({id:i,name:byId(i).answers.name})),hold:g.hold})),
+ polls:db.polls.filter(p=>!p.done).map(p=>({id:p.id,groupId:p.groupId,votes:p.votes}))}));
+app.post('/api/bot/start',auth,adm,async(q,r)=>{const u=byId(q.body.userId);if(!u||u.role!=='parent')return r.status(404).json({e:'No such family'});
+ if(u.status==='Grouped')return r.status(400).json({e:'This family is already in a group'});
+ if(db.polls.some(p=>!p.done&&p.userId===u.id))return r.status(400).json({e:'This family is waiting for a group vote'});
+ db.chats=(db.chats||[]).filter(c=>c.chat!=='dm:'+u.id);await bot.start(u);save();r.json({ok:1})});
+app.post('/api/bot/reply',auth,adm,async(q,r)=>{const u=byId(q.body.userId);if(!u)return r.status(404).json({e:'No such family'});await bot.onReply(u,q.body.text);save();r.json({ok:1})});
+app.post('/api/bot/seed',auth,adm,(q,r)=>{bot.seedDemo();r.json({ok:1})});if(db.mode==='prod')wa.start();
 app.listen(process.env.PORT||3001,()=>console.log('Pondoku on http://localhost:3001  (admin: admin@pondoku.my / admin123)'));

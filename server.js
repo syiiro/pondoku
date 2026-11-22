@@ -2,6 +2,8 @@
 const express=require('express'),fs=require('fs'),crypto=require('crypto'),nodemailer=require('nodemailer');
 const wa=require('./wa');
 const app=express();
+// Allow teammate's external frontend (Vercel/Netlify/localhost) to call this API
+app.use((q,r,n)=>{r.setHeader('Access-Control-Allow-Origin','*');r.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');r.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');if(q.method==='OPTIONS')return r.sendStatus(204);n()});
 // Express 4 does not catch async errors: without this, one bad request (e.g. a stale poll id) kills the whole server.
 for(const m of['get','post']){const o=app[m].bind(app);app[m]=(p,...hs)=>o(p,...hs.map(h=>(q,r,n)=>{const bad=e=>{console.error(e);if(!r.headersSent)r.status(500).json({e:'Server error. Please try again.'})};try{const x=h(q,r,n);if(x&&x.catch)x.catch(bad)}catch(e){bad(e)}}))}
 process.on('unhandledRejection',e=>console.error('unhandled',e));app.use(express.json());app.use(express.static(__dirname+'/public'));

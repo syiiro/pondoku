@@ -1,19 +1,25 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pondoku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FDF6E9;--card:#FFFDF9;--ink:#1E242B;--gold:#F5B82E;--line:#e6d9bd;--mute:#5b6470}
-@media(prefers-color-scheme:dark){:root{--bg:#FDF6E9;--card:#FFFDF9;--ink:#1E242B}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 Georgia,'Iowan Old Style',serif}
-main{max-width:640px;margin:0 auto;padding:20px 18px 110px}
-h1{font-size:30px;line-height:1.2;margin:.4em 0}h2{font-size:24px;line-height:1.25;margin:.5em 0}p.m{color:var(--mute);font-size:16px}
+:root{--bg:#FFFAF0;--card:#FFFFFF;--ink:#212630;--gold:#F0B830;--gold-soft:#FFE8AD;--gold-ink:#40331A;--line:#E5DBC4;--mute:#6B6E75;--label:#454A54;--field:#F7F7F2;--track:#F0E6C8;--btn-ink:#242424}
+@media(prefers-color-scheme:dark){:root{--bg:#FFFAF0;--card:#FFFFFF;--ink:#212630}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+main{max-width:720px;margin:16px 14px 110px;padding:24px 20px 32px;background:var(--card);border:1px solid var(--line);border-radius:26px}
+@media(min-width:760px){main{margin:32px auto 110px;padding:44px 48px 40px}}
+h1{font-size:30px;line-height:1.2;margin:.4em 0;font-weight:600}h2{font-size:28px;line-height:1.25;margin:.5em 0;font-weight:600}p.m{color:var(--mute);font-size:15px}
+.wm{font-size:27px;font-weight:700;margin:0;line-height:1.1;display:inline-flex;align-items:center}.wm b{background:#26282D;color:var(--gold);border-radius:20px;padding:2px 12px;margin-left:2px;font-weight:700}
+.stp{font-size:14px;font-weight:600;color:var(--label);margin:18px 0 10px}
 button,input,select{font:inherit;color:inherit;min-height:48px}
-.btn{background:var(--gold);border:0;border-radius:14px;padding:12px 22px;font-weight:700;cursor:pointer;width:100%}
-.btn.s{background:transparent;border:2px solid var(--line);font-weight:400;width:auto}
-.opt{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0;cursor:pointer}
-.opt[aria-pressed=true]{border-color:var(--ink);background:#FFF1CC}
-.row{display:flex;gap:10px;flex-wrap:wrap}.row .opt{flex:1 1 45%}
-input,select{width:100%;padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);margin:6px 0 14px}
-label{font-weight:700;font-size:16px}
-.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.btn{background:var(--gold);color:var(--btn-ink);border:0;border-radius:15px;padding:16px 32px;font-weight:600;cursor:pointer;width:100%}
+.btn.s{background:#fff;color:var(--label);border:1px solid var(--line);font-weight:600;width:auto}
+.top .btn.s,table .btn.s{padding:8px 18px}
+.opt{display:block;width:100%;text-align:left;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:13px 22px;margin:10px 0;cursor:pointer;font-size:15px;font-weight:500;color:var(--label)}
+.opt[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 .5px var(--gold);background:var(--gold-soft);color:var(--gold-ink);font-weight:600}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row .opt{flex:1 1 45%}
+input,select{width:100%;padding:0 18px;border:1px solid var(--line);border-radius:12px;background:var(--field);margin:8px 0 16px;min-height:56px;font-size:15px}
+label{font-weight:500;font-size:15px;color:var(--label)}
+.bar{height:10px;background:var(--track);border-radius:5px;overflow:hidden;margin-bottom:6px}.bar i{display:block;height:100%;background:var(--gold);border-radius:5px}
+.pill{display:inline-block;padding:6px 14px;border-radius:20px;background:var(--gold-soft);color:var(--gold-ink);font-size:13px;font-weight:600}.pill.ok{background:#DFF3E3;color:#1F5B34}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
 .tg{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:8px 14px;margin:10px 0;min-height:56px}
 .tg div{display:flex;gap:6px}.tg button{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:0 18px}.tg button[aria-pressed=true]{background:var(--gold);border-color:var(--ink);font-weight:700}
@@ -79,21 +85,22 @@ function screen(){switch(step){
   <div class="card"><b>${t('General cost estimate','Anggaran kos am')}</b><p>${t(`Estimated shared home cost: RM${e[0].toLocaleString('en-US')} to RM${e[1].toLocaleString('en-US')} per family per month (estimate only).`,`Anggaran kos rumah bersama: RM${e[0].toLocaleString('en-US')} hingga RM${e[1].toLocaleString('en-US')} sekeluarga sebulan (anggaran sahaja).`)}</p></div>
   <div class="card"><p>${t('Only your first name and WhatsApp number will be shared, and ONLY with families you are matched with. Your address, email, and child’s medical details are never shared publicly.','Hanya nama pertama dan nombor WhatsApp anda dikongsi, dan HANYA dengan keluarga yang dipadankan. Alamat, e-mel dan butiran perubatan anak tidak akan dikongsi secara umum.')}</p>
   <button class="opt" aria-pressed="${!!ans.consent}" onclick="set('consent',!ans.consent)">${ans.consent?'☑':'☐'} ${t('I agree to be matched into a group and share my first name and WhatsApp number with matched families only.','Saya bersetuju dipadankan dalam kumpulan dan berkongsi nama pertama & nombor WhatsApp dengan keluarga yang dipadankan sahaja.')}</button></div>`}}}
-function wizard(){const tt=TITLES[step-1];return `<div class="top"><p class="m">${t('Step','Langkah')} ${step} ${t('of','daripada')} 9</p><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><div class="bar" role="progressbar" aria-valuenow="${step}" aria-valuemax="9"><i style="width:${step/9*100}%"></i></div>
+function wizard(){const tt=TITLES[step-1];return `<div class="top"><h1 class="wm">Pon<b>doku</b></h1><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><p class="stp">${t('Step','Langkah')} ${step} ${t('of','daripada')} 9</p><div class="bar" role="progressbar" aria-valuenow="${step}" aria-valuemax="9"><i style="width:${step/9*100}%"></i></div>
  <h2>${t(tt[0],tt[1])}</h2>${screen()}<p class="err">${E(err)}</p>
  <div class="row" style="margin-top:18px">${step>1?`<button class="btn s" onclick="step--;err='';render()">${t('Back','Kembali')}</button>`:''}<button id="nx" class="btn" style="flex:1;opacity:${val()?1:.5}" ${val()?'':'disabled'} onclick="next()">${step===9?t('Complete & Find My Match','Selesai & Cari Padanan Saya'):t('Next','Seterusnya')}</button></div>`}
 async function next(){err='';if(step<9){step++;persist();return render()}try{await api('save',{answers:ans,step});U=await api('complete',{});localStorage.removeItem('ans');render()}catch(e){err=e.message;render()}}
 const wa=(who,msg)=>`<div class="wa"><b>${who}</b><div class="m">${E(msg)}</div></div>`;
+const stPill=(s,g)=>{const[w,ok]=U.waiting||(s==='Pending Consent'&&!g)?[t('Checking with the group','Menyemak dengan kumpulan'),0]:s==='Available'?[t('Looking for a group','Mencari kumpulan'),0]:s==='Pending Consent'?[t('Matched','Dipadankan'),1]:[t('In a group','Dalam kumpulan'),1];return `<span class="pill${ok?' ok':''}">${w}</span>`};
 function dash(){const s=U.status,g=U.group,e=U.estimate;let body='';
  if(s==='Draft')return wizard();
  if(U.waiting||(s==='Pending Consent'&&!g))body=`<h2>${t('We are checking with the group','Kami sedang menyemak dengan kumpulan')}</h2><p class="m">${t('We will email you at your registered address as soon as we hear back.','Kami akan e-mel anda sebaik sahaja ada jawapan.')}</p>`;
  else if(s==='Available')body=`<h2>${t('You are on the list','Anda dalam senarai')}</h2><p>${t('We are looking for 2 or more compatible families near you. No need to do anything.','Kami mencari 2 atau lebih keluarga sesuai berdekatan anda. Tiada tindakan diperlukan.')}</p><div class="card">${t(`General estimate: RM${e[0].toLocaleString('en-US')} to RM${e[1].toLocaleString('en-US')} per family per month (estimate only).`,`Anggaran am: RM${e[0].toLocaleString('en-US')} hingga RM${e[1].toLocaleString('en-US')} sekeluarga sebulan (anggaran sahaja).`)}</div>`;
  else if(s==='Pending Consent'&&g)body=`<h2>${t('Your group is ready','Kumpulan anda sudah sedia')}</h2><p>${t(`Group match: ${g.score}%. Joining is your choice, and only you decide.`,`Padanan kumpulan: ${g.score}%. Menyertai ialah pilihan anda.`)}</p>${U.invite?`<a class="btn" style="display:block;text-align:center;text-decoration:none;line-height:24px" href="${E(U.invite)}" target="_blank" rel="noopener">${t('Join the WhatsApp group','Sertai kumpulan WhatsApp')}</a>`:`<p class="m">${t('Your private invite link is being prepared.','Pautan jemputan peribadi sedang disediakan.')}</p>`}`;
  else body=`<h2>${t('You are in a group','Anda dalam kumpulan')}</h2><p>${g.size} ${t('families','keluarga')} · ${g.score}%</p>${U.invite?`<a href="${E(U.invite)}" target="_blank" rel="noopener">WhatsApp</a>`:''}${g.welcome?wa('Pondoku Helper 📌',g.welcome):''}`;
- return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="out()">${t('Log out','Log keluar')}</button></div><p class="m">${E(U.code||'')}</p>${body}${g?`<p><button class="btn s" onclick="leave()">${t('Leave group / Reset status','Keluar kumpulan / Set semula status')}</button></p>`:''}`}
+ return `<div class="top"><h1 class="wm">Pon<b>doku</b></h1><button class="btn s" onclick="out()">${t('Log out','Log keluar')}</button></div><p class="m">${E(U.code||'')}</p>${stPill(s,g)}${body}${g?`<p><button class="btn s" onclick="leave()">${t('Leave group / Reset status','Keluar kumpulan / Set semula status')}</button></p>`:''}`}
 async function leave(){if(confirm(t('Leave this group?','Keluar dari kumpulan ini?'))){U=await api('leave',{});render()}}
 const out=()=>{['tok','ans','step','uid'].forEach(k=>localStorage.removeItem(k));ans={};step=1;T=null;U=null;AD=null;render()};
-function auth(){return `<div class="top"><h1>Pondoku</h1><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><p>${t('Shared-care family matching for parents in Malaysia. Calm, private, no typing marathons.','Padanan keluarga penjagaan bersama untuk ibu bapa di Malaysia. Tenang, peribadi, tanpa menaip panjang.')}</p>
+function auth(){return `<div class="top"><h1 class="wm">Pon<b>doku</b></h1><button class="btn s" onclick="L=L==='bm'?'en':'bm';persist();render()">${L==='bm'?'EN':'BM'}</button></div><p>${t('Shared-care family matching for parents in Malaysia. Calm, private, no typing marathons.','Padanan keluarga penjagaan bersama untuk ibu bapa di Malaysia. Tenang, peribadi, tanpa menaip panjang.')}</p>
  <label>Email</label><input id="em" type="email" autocomplete="email"><label>${t('Password','Kata laluan')}</label><input id="pw" type="password" autocomplete="current-password"><p class="err">${E(err)}</p>
  <div class="row"><button class="btn" style="flex:1" onclick="login('login')">${t('Log in','Log masuk')}</button><button class="btn s" onclick="login('register')">${t('Sign up','Daftar')}</button></div>`}
 async function login(p){try{const r=await api(p,{email:$('#em').value,password:$('#pw').value});T=localStorage.tok=r.token;if(localStorage.uid!==r.user.id){localStorage.removeItem('ans');localStorage.removeItem('step');ans={};step=1;localStorage.uid=r.user.id}err='';await boot()}catch(e){err=e.message;render()}}
